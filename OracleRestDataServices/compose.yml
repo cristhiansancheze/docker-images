@@ -1,0 +1,68 @@
+name: ords-demo
+
+services:
+  database:
+    image: "${DB_IMAGE:-container-registry.oracle.com/database/free:latest}"
+    hostname: database
+    environment:
+      ORACLE_PDB: "${DB_SERVICE:-FREEPDB1}"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        export ORACLE_PWD="$$(< /run/secrets/ORACLE_PWD)"
+        exec "$${ORACLE_BASE}/$${RUN_FILE:-runOracle.sh}"
+    volumes:
+      # Keep the original bind mount so upgrades continue using existing data.
+      - ./db_files:/opt/oracle/oradata
+    ports:
+      - "${DB_PORT:-1521}:1521"
+    secrets:
+      - ORACLE_PWD
+    healthcheck:
+      test: ["CMD", "/opt/oracle/checkDBStatus.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+
+  ords:
+    image: "${ORDS_IMAGE:-localhost/my_ords:latest}"
+    hostname: ords
+    restart: on-failure
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        export ORACLE_PWD="$$(< /run/secrets/ORACLE_PWD)"
+        export ORACLE_USER_PWD="$$(< /run/secrets/ORACLE_USER_PWD)"
+        exec /usr/bin/docker-entrypoint.sh
+    environment:
+      DBHOST: database
+      DBPORT: 1521
+      DBSERVICENAME: "${DB_SERVICE:-FREEPDB1}"
+      ORDS_DB_POOL: "${ORDS_DB_POOL:-default}"
+      ORACLE_USER_NAME: "${ORACLE_USER_NAME:-}"
+    volumes:
+      # Keep the original bind mount so upgrades continue using existing pools
+      # and wallet configuration.
+      - ./ords_config:/etc/ords/config
+      - ./custom-scripts:/ords-entrypoint.d:ro
+    ports:
+      - "${ORDS_PORT:-8080}:8080"
+    secrets:
+      - ORACLE_PWD
+      - ORACLE_USER_PWD
+    healthcheck:
+      test: ["CMD-SHELL", "curl --noproxy localhost -f -k http://localhost:8080/ords/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    depends_on:
+      database:
+        condition: service_healthy
+
+secrets:
+  ORACLE_PWD:
+    file: "${COMPOSE_SECRET_DIR:-./secrets}/oracle_pwd"
+  ORACLE_USER_PWD:
+    file: "${COMPOSE_SECRET_DIR:-./secrets}/oracle_user_pwd"
