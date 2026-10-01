@@ -24,7 +24,7 @@ These variables are also used by the Compose build below.
 # Set the variables for an ARM64 build and the ORDS version you selected.
 export ords_ver=26.2.3
 export sqlcl_rpm_url='https://public-yum.oracle.com/repo/OracleLinux/OL10/oracle/software/aarch64/getPackage/sqlcl-linux-26.2.1-2.el10.aarch64.rpm'
-export ords_rpm_url='https://public-yum.oracle.com/repo/OracleLinux/OL10/oracle/software/aarch64/getPackage/ords-26.3.0-5.el10.noarch.rpm'
+export ords_rpm_url='https://public-yum.oracle.com/repo/OracleLinux/OL10/oracle/software/aarch64/getPackage/ords-26.3.0-6.el10.noarch.rpm'
 docker build   --platform linux/arm64   --build-arg ORDS_VERSION=$ords_ver --build-arg ORDS_RPM_URL=$ords_rpm_url --build-arg SQLCL_RPM_URL=$sqlcl_rpm_url -f Dockerfile   -t my_ords:$ords_ver .
 ```
 
