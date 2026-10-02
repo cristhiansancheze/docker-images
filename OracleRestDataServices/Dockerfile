@@ -91,8 +91,10 @@ COPY srcfiles/entrypoint.sh /usr/bin/docker-entrypoint.sh
 LABEL "provider"="Oracle" \
       "issues"="https://github.com/oracle/docker-images/issues" \
       "volume.config"="/etc/ords/config" \
-      "port.http"="8080" \
-      "port.https"="8443"
+      "volume.apex"="/opt/oracle/apex" \
+      "volume.startup.scripts"="/ords-entrypoint.d" \
+      "port.app.http"="8080" \
+      "port.app.https"="8443"
 
 RUN  ln -s  /opt/oracle/ords/bin/ords  /usr/bin/ords \
      && ln -s  /opt/oracle/sqlcl/bin/sql  /usr/bin/sql 

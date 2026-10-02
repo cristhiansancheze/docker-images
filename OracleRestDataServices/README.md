@@ -125,6 +125,24 @@ Parameters:
   -e ORACLE_PWD:
                     The Oracle Database SYS password for standard databases;
                     for ADB connections, this is the ADMIN password.
+  -e ORACLE_USER_PWD:
+                    Required for a new ORDS installation. By default, it is
+                    used for the ORDS administrative and runtime accounts.
+                    It can also be supplied through the readable Docker
+                    secret file /run/secrets/ORACLE_USER_PWD.
+  -e ORACLE_USER_NAME:
+                    Optional existing database user for the ORDS installation.
+                    When set with ORACLE_USER_PWD, the user must already
+                    exist and have the required ORDS privileges; the
+                    container does not create the user or grant privileges.
+                    ORACLE_PWD remains required to detect and test the
+                    database connection.
+  -e DB_WAIT_RETRY:
+                    Number of 10-second connection attempts during a new
+                    installation (60 by default in the image environment).
+  -e ORDS_DB_WAIT_RETRY:
+                    Number of 10-second connection attempts for a preset
+                    configuration; defaults to 10.
   -e FORCE_SECURE   If the FORCE_SECURE flag is TRUE and valid certificates
                     files are not provided. at the configuration directory
                     /etc/ords/config/ssl. The ORDS instance will not start.
