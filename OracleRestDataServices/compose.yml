@@ -34,7 +34,8 @@ services:
         ORDS_VERSION: "${ords_ver}"
         ORDS_RPM_URL: "${ords_rpm_url}"
         SQLCL_RPM_URL: "${sqlcl_rpm_url}"
-        GRAALVM_BASE_IMAGE: "${GRAALVM_BASE_IMAGE:-container-registry.oracle.com/graalvm/jdk:25}"
+        GRAALVM_BASE_IMAGE: "${GRAALVM_BASE_IMAGE:-container-registry.oracle.com/graalvm/jdk}"
+        GRAALVM_VERSION: "${GRAALVM_VERSION:-25}"
     hostname: ords
     restart: on-failure
     entrypoint: ["/bin/bash", "-c"]

@@ -2,7 +2,8 @@
 ARG ORDS_VERSION
 ARG ORDS_RPM_URL
 ARG SQLCL_RPM_URL
-ARG GRAALVM_BASE_IMAGE=container-registry.oracle.com/graalvm/jdk:25
+ARG GRAALVM_BASE_IMAGE=container-registry.oracle.com/graalvm/jdk
+ARG GRAALVM_VERSION=25
 
 FROM maven:3.9-eclipse-temurin-21 AS jar-downloader
 
@@ -43,7 +44,7 @@ RUN mvn --batch-mode --no-transfer-progress -f /tmp/pom.xml dependency:copy-depe
       -DexcludeTransitive=true \
     && rm -rf /root/.m2 /tmp/pom.xml
 
-FROM ${GRAALVM_BASE_IMAGE} AS builder
+FROM ${GRAALVM_BASE_IMAGE}:${GRAALVM_VERSION} AS builder
 ARG ORDS_VERSION
 ARG ORDS_RPM_URL
 ARG SQLCL_RPM_URL
@@ -65,8 +66,9 @@ RUN  microdnf install -y curl ncurses procps-ng \
      # set ords config default when not installed by rpm
      && sed -i 's/rpm -qf/echo/g' /opt/oracle/ords/bin/ords \
      && rm -rf /tmp/jar-files /tmp/pom.xml
-FROM ${GRAALVM_BASE_IMAGE}
+FROM ${GRAALVM_BASE_IMAGE}:${GRAALVM_VERSION}
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG  ORDS_VERSION
 ENV  ORDS_VER=$ORDS_VERSION \
@@ -85,6 +87,12 @@ RUN  microdnf install -y curl ncurses \
 
 COPY --from=builder ["/opt/oracle/", "/opt/oracle/"]
 COPY srcfiles/entrypoint.sh /usr/bin/docker-entrypoint.sh
+
+LABEL "provider"="Oracle" \
+      "issues"="https://github.com/oracle/docker-images/issues" \
+      "volume.config"="/etc/ords/config" \
+      "port.http"="8080" \
+      "port.https"="8443"
 
 RUN  ln -s  /opt/oracle/ords/bin/ords  /usr/bin/ords \
      && ln -s  /opt/oracle/sqlcl/bin/sql  /usr/bin/sql 

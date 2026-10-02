@@ -47,8 +47,7 @@ for secret_name in ORACLE_PWD ORACLE_USER_PWD; do
     if [[ -z "${!secret_name:-}" ]] && [[ -r "/run/secrets/${secret_name}" ]]; then
         secret_value=$(< "/run/secrets/${secret_name}")
         secret_value="${secret_value//$'\n'/}"
-        printf -v "${secret_name}" '%s' "${secret_value}"
-        export "${secret_name}"
+        export "${secret_name}=${secret_value}"
     fi
 done
 
@@ -925,7 +924,7 @@ function _connection_error(){
 
 function _run_cli(){
     printf "%s%s\n" "INFO : " "Running Oracle REST Data Services CLI command."
-    ${ORDS_HOME}/bin/ords ${CLI_CMD}
+    "${ORDS_HOME}/bin/ords" "$@"
 }
 
 function _get_pool(){
@@ -1020,7 +1019,7 @@ function _run_script(){
             fi
         fi
     else
-        _run_cli
+        _run_cli "$@"
     fi
 }
 function _debug_log() {
@@ -1041,5 +1040,5 @@ function _debug_log() {
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     _debug_log
-    _run_script
+    _run_script "$@"
 fi

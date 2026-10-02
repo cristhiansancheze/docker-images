@@ -8,11 +8,11 @@ Before pulling either Oracle Container Registry base image, sign in to the
 registry and accept the image license in the Oracle Container Registry web UI.
 
 ```sh
-docker login container-registry.oracle.com
+podman login container-registry.oracle.com
 ```
 
 To build a custom ORDS image, you must first select the desired SQLCL and ORDS RPM packages from the Oracle repository to determine their versions. These versions should then be passed as build arguments (`--build-arg`) during the container build process.
-The optional `GRAALVM_BASE_IMAGE` argument selects the GraalVM JDK base image; it defaults to `container-registry.oracle.com/graalvm/jdk:25`. Note: GraphQL functionality in ORDS requires additional dependencies. For details see [ORDS GraalVM Configuration in the ORDS Installation and Configuration Guide](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.2/ordig/installing-REST-data-services.html#GUID-DAF1FD0D-0062-4C4D-B481-A9209AB89799).
+The optional `GRAALVM_BASE_IMAGE` and `GRAALVM_VERSION` build arguments select the GraalVM JDK base image; they default to `container-registry.oracle.com/graalvm/jdk` and `25`. Note: GraphQL functionality in ORDS requires additional dependencies. For details see [ORDS GraalVM Configuration in the ORDS Installation and Configuration Guide](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.2/ordig/installing-REST-data-services.html#GUID-DAF1FD0D-0062-4C4D-B481-A9209AB89799).
 
 The image also requires a supported Java or GraalVM JDK. See the [ORDS installation documentation](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.2/ordig/installing-REST-data-services.html#GUID-F6A4F94A-D62F-4A35-A471-6306332DF522) for the currently supported options.
 
@@ -22,10 +22,10 @@ The image also requires a supported Java or GraalVM JDK. See the [ORDS installat
 These variables are also used by the Compose build below.
 ```bash
 # Set the variables for an ARM64 build and the ORDS version you selected.
-export ords_ver=26.2.3
+export ords_ver=26.3.0
 export sqlcl_rpm_url='https://public-yum.oracle.com/repo/OracleLinux/OL10/oracle/software/aarch64/getPackage/sqlcl-linux-26.2.1-2.el10.aarch64.rpm'
 export ords_rpm_url='https://public-yum.oracle.com/repo/OracleLinux/OL10/oracle/software/aarch64/getPackage/ords-26.3.0-6.el10.noarch.rpm'
-docker build   --platform linux/arm64   --build-arg ORDS_VERSION=$ords_ver --build-arg ORDS_RPM_URL=$ords_rpm_url --build-arg SQLCL_RPM_URL=$sqlcl_rpm_url -f Dockerfile   -t my_ords:$ords_ver .
+podman build   --platform linux/arm64   --build-arg ORDS_VERSION=$ords_ver --build-arg ORDS_RPM_URL=$ords_rpm_url --build-arg SQLCL_RPM_URL=$sqlcl_rpm_url -f Dockerfile   -t my_ords:$ords_ver .
 ```
 
 This example builds for ARM64. For AMD64 or another platform, use matching
@@ -33,7 +33,7 @@ Oracle Linux RPM URLs and change the `--platform` value accordingly.
 
 To verify the image was built correctly, run
 ```sh
-docker image ls
+podman image ls
 ```
 
 ## Using This Image
@@ -42,7 +42,7 @@ docker image ls
 
 To start an ORDS instance, execute the following command: 
 ```sh
-docker run --name <container_name> -v <ords-config>:/etc/ords/config my_ords:<ords_ver>
+podman run --name <container_name> -v <ords-config>:/etc/ords/config my_ords:<ords_ver>
 ```
 Where `<container_name>` is the name of your container and `<ords-config>` is the volume that contains the ORDS configuration details.
 
@@ -51,10 +51,7 @@ Where `<container_name>` is the name of your container and `<ords-config>` is th
 > * For startup without database-installation credentials, the configuration volume must contain `/etc/ords/config/global/settings.xml` and at least one pool definition at `/etc/ords/config/databases/<pool_name>/pool.xml`.
 > * Throughout this document, words enclosed within angle brackets `< >` indicate variables in code lines.
 > * To learn about advanced use cases, refer to the [Custom Configurations](#custom-configurations) section.
-> * This document uses Docker as the prescribed container runtime, but any OCI-compatible[^1] container runtime can also be used.
-
-[^1]: [About](https://opencontainers.org/) the Open Container Initiative (OCI).
-
+> * These build and usage examples use Podman
 ### Custom Configurations
 
 The Oracle REST Data Services container supports various configuration parameters to facilitate custom configurations.
@@ -63,10 +60,10 @@ The Oracle REST Data Services container supports various configuration parameter
 
 ##### Run ORDS instance
 
-This example shows how you might structure a `docker run` command to run an ORDS instance, using the available ORDS installation custom configuration options.
+This example shows how you might structure a `podman run` command to run an ORDS instance, using the available ORDS installation custom configuration options.
 
 ```sh
-docker run -d --name <container_name> \
+podman run -d --name <container_name> \
   -p <http_host_port>:8080 -p <https_host_port>:8443 \
   -e FORCE_SECURE=TRUE \
   -e DEBUG=TRUE \
@@ -86,7 +83,7 @@ my_ords:<ords_ver>
 
   <em>Database Hostname Port (when using the latest 23ai/free image):</em> 
 
-  `docker container inspect <Your database's container ID> --format "{{.Config.Hostname}}"`
+  `podman container inspect <Your database's container ID> --format "{{.Config.Hostname}}"`
     
   <em>Database Port (when using the latest 23ai/free image):</em>>
 
@@ -95,7 +92,7 @@ my_ords:<ords_ver>
 
   <em>Database Servicename (when using the latest 23ai/free image):</em>
 
-  `docker logs <Your database's container ID>` *then*, search for your Pluggable Database's Name. The PDB default for 23ai is `FREEPDB1`.
+  `podman logs <Your database's container ID>` *then*, search for your Pluggable Database's Name. The PDB default for 23ai is `FREEPDB1`.
 
 ```sh
 Parameters:
@@ -198,7 +195,7 @@ Mount it as read-only (`:ro`) when starting ORDS. Use the following environment
 and volume options:
 
 ```sh
-docker run --name ords \
+podman run --name ords \
   -e 'JDK_JAVA_OPTIONS=-Djava.security.properties=/etc/ords/config/java-security-compat.properties' \
   -v <ords-config>:/etc/ords/config \
   -v <absolute-path>/java-security-compat.properties:/etc/ords/config/java-security-compat.properties:ro \
@@ -214,7 +211,7 @@ docker run --name ords \
 > **NOTE:** Setting database variables is not necessary when using this option.
 
 ```sh
-docker run -d --name <container_name> \
+podman run -d --name <container_name> \
   -p <http_host_port>:8080 -p <https_host_port>:8443 \
   -e FORCE_SECURE=TRUE \
   -e DEBUG=TRUE \
@@ -259,7 +256,7 @@ Parameters:
 
 **Example 1:** This example shows how to use ORDS CLI commands to configure a Customer Managed ORDS (using the ADB-S service). 
 
-> **NOTE:** Docker is used in this example.
+> **NOTE:** This example uses Podman
 
 1. Step 1: Create a volume, download a wallet, and create a secrets file.
 
@@ -279,7 +276,7 @@ Parameters:
 2. Step 2: Install your customer managed ORDS.  
 
     ```sh
-    cat secrets.txt | docker run --rm -i  \
+    cat secrets.txt | podman run --rm -i  \
         -v <your_path>/ords_atp_config:/etc/ords/config  \
         -v <your_path>/atp_wallet.zip:/atp_wallet.zip \
         my_ords:<ords_ver> install adb --admin-user <DATABASE USER> --db-user <DATABASE USER> --gateway-user <DATABASE USER> --wallet /atp_wallet.zip --wallet-service-name <NET SERVICE NAME> --feature-sdw true --password-stdin
@@ -289,12 +286,14 @@ Parameters:
     ```sh
     mkdir -p <your_path>/ords_atp_config/ssl
     openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out <your_path>/ords_atp_config/ssl/cert.crt -keyout <your_path>/ords_atp_config/ssl/key.key -subj "/C=US/ST=State/L=City/O=my_corp Corp/OU=my_unit/CN=localhost"
-    chmod -R 777 <your_path>/ords_atp_config/ssl
+    chmod 755 <your_path>/ords_atp_config/ssl
+    chmod 644 <your_path>/ords_atp_config/ssl/cert.crt
+    chmod 600 <your_path>/ords_atp_config/ssl/key.key
     ```
 4. Step 4: Start ORDS customer managed. 
 
     ```sh
-    docker run --rm -i  \
+    podman run --rm -i  \
         -p 8443:8443 \
         -v <your_path>/ords_atp_config:/etc/ords/config  \
         -v <your_path>/atp_wallet.zip:/atp_wallet.zip \
@@ -307,7 +306,7 @@ Parameters:
 1. Step 1: Get the current password.
 
     ```sh
-    docker run \
+    podman run \
         -v <ords_config_volume>:/etc/ords/config \
         my_ords:<ords_ver> config --db-pool <pool_name> get --secret db.password
     ```  
@@ -315,7 +314,7 @@ Parameters:
 2. Step 2: Update the password. 
 
     ```sh
-    docker run -it \
+    podman run -it \
         -v <ords_config_volume>:/etc/ords/config \
         my_ords:<ords_ver> config --db-pool <pool_name> secret db.password
     ```
@@ -385,7 +384,7 @@ The other variables available when starting the containers are:
 - `RUN_FILE`: Database startup script; defaults to `runOracle.sh`.
 
 ```sh
-docker compose build
+podman compose build
 ```
 
 For a preconfigured database user, provide `ORACLE_USER_NAME` along with the
@@ -396,7 +395,7 @@ mode:
 ```sh
 ORACLE_USER_NAME=ORDS_USER \
 DB_SERVICE=FREEPDB1 \
-docker compose up -d
+podman compose up -d
 ```
 
 The first database startup can take several minutes. Verify the services and
@@ -439,7 +438,7 @@ mapping under the `ords` service's `ports` list and provide the TLS files below:
   APEX installation or upgrade logic.
 - Put TLS files at `/etc/ords/config/ssl/cert.crt` and
   `/etc/ords/config/ssl/key.key` to use HTTPS.
-- Use `docker logs <container>` to inspect installation and runtime logs.
+- Use `podman logs <container>` to inspect installation and runtime logs.
 - Use `DEBUG=true` for redacted startup diagnostics.
 - For a new installation, the entrypoint retries database connectivity up to
   60 times with a 10-second delay. For a preset configuration, it retries the
@@ -449,7 +448,7 @@ mapping under the `ords` service's `ports` list and provide the TLS files below:
 
 The Compose file is [`compose.yml`](compose.yml):
 
-> **NOTE:** Running the ORDS container on a Docker machine with JVM low memory allocation may result in the container crashing with a Java out of memory exception. If needed, set `JDK_JAVA_OPTIONS` in the `ords` service environment in your Compose override file.
+> **NOTE:** Running the ORDS container on a host with low JVM memory allocation may result in the container crashing with a Java out of memory exception. If needed, set `JDK_JAVA_OPTIONS` in the `ords` service environment in your Compose override file.
 
 
 ### Starting the ORDS container on secure port 8443
@@ -482,5 +481,5 @@ You can configure the Docker image to run scripts (.sh extensions are supported)
 You can access the ORDS console logs with the following command (where `<ords>` is the service/container name):
 
 ```sh
- docker compose logs ords
+ podman compose logs ords
 ```
