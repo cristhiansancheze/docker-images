@@ -79,7 +79,7 @@ podman run -d --name <container_name> \
 my_ords:<ords_ver>
 ```
 <details>
-  <summary><strong> <kbd>< Click</kbd> Obtaining the DBHOST, DBPORT, and DBSERVICENAME values from your running database container.</strong></summary><p></p>
+  <summary><strong>Obtaining the DBHOST, DBPORT, and DBSERVICENAME values from your running database container.</strong></summary><p></p>
 
   <em>Database Hostname Port (when using the latest 23ai/free image):</em> 
 
@@ -93,6 +93,7 @@ my_ords:<ords_ver>
   <em>Database Servicename (when using the latest 23ai/free image):</em>
 
   `podman logs <Your database's container ID>` *then*, search for your Pluggable Database's Name. The PDB default for 23ai is `FREEPDB1`.
+</details>
 
 ```sh
 Parameters:
