@@ -52,6 +52,48 @@ Where `<container_name>` is the name of your container and `<ords-config>` is th
 > * Throughout this document, words enclosed within angle brackets `< >` indicate variables in code lines.
 > * To learn about advanced use cases, refer to the [Custom Configurations](#custom-configurations) section.
 > * These build and usage examples use Podman
+
+### Entrypoint Script behavior
+
+The image entrypoint uses the arguments passed to the container to choose a
+startup path. With no command arguments, it checks for database installation
+credentials first. If those are not supplied, it looks for an existing ORDS
+configuration. If neither path is usable, startup exits with an error.
+
+| Startup case | Required inputs | Startup behavior |
+| --- | --- | --- |
+| Install or upgrade ORDS | `DBHOST`, `DBPORT`, `DBSERVICENAME`, and `ORACLE_PWD`, or `CONN_STRING` and `ORACLE_PWD`; `ORACLE_USER_PWD` is required when a new installation is needed | Tests database connectivity, installs or upgrades ORDS for the selected pool, configures ORDS, runs custom startup scripts, then starts `ords serve`. |
+| Use an existing ORDS configuration | `/etc/ords/config/global/settings.xml` and at least one pool under `/etc/ords/config/databases/`; no database installation credentials required | Selects the requested pool when present, otherwise the first available pool; checks its database connection when possible, applies runtime settings, runs custom scripts, then starts `ords serve`. A failed pool health check is logged after retries, but does not prevent ORDS from starting. |
+| Run an ORDS CLI command | One or more command arguments after the image name | Runs the requested ORDS CLI command and exits; normal service startup does not run. |
+| No credentials and no valid configuration | Neither of the first two cases is satisfied | Exits with an error explaining the required connection variables or configuration files. |
+
+For credential-based startup, `ORACLE_USER_NAME` and `ORACLE_USER_PWD` can
+select an existing database user with the privileges required by ORDS. The
+container does not create that user or grant privileges in this mode. Without
+`ORACLE_USER_NAME`, the entrypoint uses the SYS-based installation flow.
+
+See [Configuration and operations](#configuration-and-operations) for pool
+selection, retry settings, TLS, and custom startup scripts.
+
+### APEX behavior and scope
+
+APEX integration is limited to the startup behavior below. For administration
+and application use cases, refer to the
+[Oracle APEX documentation](https://docs.oracle.com/en/database/oracle/apex/)
+or the APEX team.
+
+| Mounted APEX content | Credential-based startup | Preset-configuration startup |
+| --- | --- | --- |
+| `/opt/oracle/apex/images/` exists | Sets it as the ORDS standalone static-file path. | Same behavior. |
+| APEX distribution includes `core/scripts/set_appun.sql` and `apxsilentins.sql` | Checks database and mounted versions; installs APEX if absent or upgrades when the mounted version is newer. A newer database version stops startup. | Does not install or upgrade APEX. |
+
+Automated installation uses the configured database connection and rejects
+remote CDB installation. If `APEX_PWD` is unset, the entrypoint generates a
+temporary `APEX_PUBLIC_USER` password and prints instructions to change it.
+The container does not provision an APEX administrator or workspace, and does
+not expose an `apex_admin` setting. Refer to APEX documentation or the APEX team
+for administration and application use cases.
+
 ### Custom Configurations
 
 The Oracle REST Data Services container supports various configuration parameters to facilitate custom configurations.
