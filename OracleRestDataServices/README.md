@@ -12,9 +12,9 @@ podman login container-registry.oracle.com
 ```
 
 To build a custom ORDS image, you must first select the desired SQLCL and ORDS RPM packages from the Oracle repository to determine their versions. These versions should then be passed as build arguments (`--build-arg`) during the container build process.
-The optional `GRAALVM_BASE_IMAGE` and `GRAALVM_VERSION` build arguments select the GraalVM JDK base image; they default to `container-registry.oracle.com/graalvm/jdk` and `25`. Note: GraphQL functionality in ORDS requires additional dependencies. For details see [ORDS GraalVM Configuration in the ORDS Installation and Configuration Guide](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.2/ordig/installing-REST-data-services.html#GUID-DAF1FD0D-0062-4C4D-B481-A9209AB89799).
+The optional `GRAALVM_BASE_IMAGE` and `GRAALVM_VERSION` build arguments select the GraalVM JDK base image; they default to `container-registry.oracle.com/graalvm/jdk` and `25`. Note: GraphQL functionality in ORDS requires additional dependencies. For details see [ORDS GraalVM Configuration in the ORDS Installation and Configuration Guide](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.3/ordig/installing-REST-data-services.html#GUID-DAF1FD0D-0062-4C4D-B481-A9209AB89799).
 
-The image also requires a supported Java or GraalVM JDK. See the [ORDS installation documentation](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.2/ordig/installing-REST-data-services.html#GUID-F6A4F94A-D62F-4A35-A471-6306332DF522) for the currently supported options.
+The image also requires a supported Java or GraalVM JDK. See the [ORDS installation documentation](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.3/ordig/installing-REST-data-services.html#GUID-DAF1FD0D-0062-4C4D-B481-A9209AB89799) for the currently supported options.
 
 [OL10 repository.](https://yum.oracle.com/repo/OracleLinux/OL10/oracle/software/x86_64/index.html)
 
@@ -332,7 +332,7 @@ Parameters:
     EOF
     chmod 600 secrets.txt
     ```  
-> **NOTE:** To download the wallet for the Autonomous Database instance, review the instructions for [Downloading Client Credentials](https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/doc/connect-download-wallet.html#GUID-B06202D2-0597-41AA-9481-3B174F75D4B1). For additional information about passwords in the secrets file, review the [Installing and Configuring Customer Managed ORDS](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/25.2/ordig/installing-and-configuring-customer-managed-ords-autonomous-database.html#GUID-AC7F9A42-A7C2-4453-B8D1-BFD2784C3CA0) documentation.
+> **NOTE:** To download the wallet for the Autonomous Database instance, review the instructions for [Downloading Client Credentials](https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/doc/connect-download-wallet.html#GUID-B06202D2-0597-41AA-9481-3B174F75D4B1). For additional information about passwords in the secrets file, review the [Installing and Configuring Customer Managed ORDS](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.3/ordig/installing-and-configuring-oracle-rest-data-services.html#GUID-D86804FC-4365-4499-B170-2F901C971D30) documentation.
 
 2. Step 2: Install your customer managed ORDS.  
 
@@ -384,7 +384,7 @@ Use `ORDS_DB_POOL` when a pool name is desired. If `--db-pool <pool_name>` is
 omitted, then the default pool is implied (e.g. `ords/[rest service]` vs
 `ords/<pool_name>/[rest service]`).
 
-> **NOTE:** For more details on ORDS CLI commands see [Help Center](https://docs.oracle.com/search/?q=CLI&lang=en&category=database&product=en%2Fdatabase%2Foracle%2Foracle-rest-data-services%2F25.2).
+> **NOTE:** For more details on ORDS CLI commands see [Help Center](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.3/ordig/installing-and-configuring-oracle-rest-data-services.html#GUID-B52816FE-58C7-4B5A-8EAA-4BB191288322).
 
 ##### Using the Compose file
 
@@ -466,8 +466,8 @@ Compose passes `ORACLE_USER_NAME` to the ORDS container when it is set. Leave
 it unset to use the SYS-based installation flow, but still provide the
 `ORACLE_USER_PWD` secret.
 
-[ORDS installation and configuration guide](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.1/ordig/installing-and-configuring-oracle-rest-data-services.html)
-and [configuration strategies for multiple databases](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.2/ordig/configuring-additional-databases.html).
+[ORDS installation and configuration guide](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.3/ordig/installing-REST-data-services.html)
+and [configuration strategies for multiple databases](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.3/ordig/configuring-additional-databases.html#GUID-088E0DE7-F514-4FEF-9FDA-5F5F403D5840).
 Existing pool directories are not renamed automatically. The APEX static path,
 when configured from `/opt/oracle/apex/images`, is applied as the standalone
 configuration rather than being selected with `ORDS_DB_POOL`.
