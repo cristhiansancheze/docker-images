@@ -444,6 +444,8 @@ The other variables available when starting the containers are:
   `oracle_user_pwd`; defaults to `./secrets`.
 - `RUN_FILE`: Database startup script; defaults to `runOracle.sh`.
 
+#### Build Container using the compose file
+
 ```sh
 podman compose build
 ```
@@ -452,6 +454,8 @@ For a preconfigured database user, provide `ORACLE_USER_NAME` along with the
 `ORACLE_USER_PWD` secret. The user must already exist and have the privileges
 required by ORDS; the container does not create or grant privileges in this
 mode:
+
+#### Start Container using the compose file
 
 ```sh
 podman compose up -d
