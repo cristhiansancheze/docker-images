@@ -454,8 +454,6 @@ required by ORDS; the container does not create or grant privileges in this
 mode:
 
 ```sh
-ORACLE_USER_NAME=ORDS_USER \
-DB_SERVICE=FREEPDB1 \
 podman compose up -d
 ```
 
