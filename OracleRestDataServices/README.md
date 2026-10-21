@@ -386,7 +386,7 @@ omitted, then the default pool is implied (e.g. `ords/[rest service]` vs
 
 > **NOTE:** For more details on ORDS CLI commands see [Help Center](https://docs.oracle.com/en/database/oracle/oracle-rest-data-services/26.3/ordig/installing-and-configuring-oracle-rest-data-services.html#GUID-B52816FE-58C7-4B5A-8EAA-4BB191288322).
 
-##### Using the Compose file
+## Using the Compose file
 
 Use the build variables declared above, then create the two secret files and
 build the stack. The Compose file uses `localhost/my_ords:latest` by default.
